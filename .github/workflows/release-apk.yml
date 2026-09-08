@@ -44,12 +44,21 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Sync Capacitor Android
+        env:
+          CAPACITOR_TELEMETRY: "false"
         run: |
-          if [ ! -d "android" ]; then
-            echo "Android directory not found in repository. Adding Android platform..."
+          if [ ! -f "android/build.gradle" ] || [ ! -f "android/app/build.gradle" ]; then
+            echo "Android directory is missing or incomplete. Initializing clean Android platform..."
+            rm -rf android
             npx --yes @capacitor/cli add android
           fi
-          npx --yes @capacitor/cli sync android
+
+          if ! npx --yes @capacitor/cli sync android; then
+            echo "Capacitor sync encountered an error. Recreating Android platform from scratch..."
+            rm -rf android
+            npx --yes @capacitor/cli add android
+            npx --yes @capacitor/cli sync android
+          fi
 
       - name: Make Gradlew Executable
         run: |
