@@ -1,0 +1,6 @@
+{
+  "name": "OmniCraft 3D Game Studio",
+  "description": "No-code 3D platformer and mystery adventure game creator with realistic lighting, weather, companion customization, and branching narratives.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

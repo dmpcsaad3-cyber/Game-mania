@@ -1,0 +1,107 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type (debug / release)'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - debug
+          - release
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build web application
+        run: npm run build
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle Packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Sync Capacitor Android Project
+        run: |
+          npx cap sync android
+
+      - name: Make Gradlew Executable
+        run: chmod +x android/gradlew
+
+      - name: Build APK with Gradle
+        run: |
+          cd android
+          if [ "${{ github.event.inputs.build_type }}" = "release" ]; then
+            ./gradlew assembleRelease --no-daemon || ./gradlew assembleDebug --no-daemon
+          else
+            ./gradlew assembleDebug --no-daemon
+          fi
+
+      - name: Prepare APK Artifact
+        run: |
+          mkdir -p build-artifacts
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk build-artifacts/OmniCraft-3D-Studio-debug.apk
+            echo "APK_FILE=build-artifacts/OmniCraft-3D-Studio-debug.apk" >> $GITHUB_ENV
+          elif [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk build-artifacts/OmniCraft-3D-Studio-release.apk
+            echo "APK_FILE=build-artifacts/OmniCraft-3D-Studio-release.apk" >> $GITHUB_ENV
+          fi
+
+      - name: Upload Android APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OmniCraft-3D-Studio-APK
+          path: ${{ env.APK_FILE }}
+          retention-days: 30
+
+      - name: Add Job Summary
+        run: |
+          echo "## 🎮 Android APK Built Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Your **OmniCraft 3D Game Studio** APK is ready for your phone." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📲 How to Install on Your Phone:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Go to the **Summary** tab of this GitHub Actions run." >> $GITHUB_STEP_SUMMARY
+          echo "2. Under **Artifacts**, download \`OmniCraft-3D-Studio-APK\` (or transfer the downloaded \`.apk\` to your Android phone via USB, Google Drive, or Telegram)." >> $GITHUB_STEP_SUMMARY
+          echo "3. On your phone, open your **Files** or **Downloads** app and tap the APK file." >> $GITHUB_STEP_SUMMARY
+          echo "4. If prompted: allow **Install unknown apps** for Chrome or your Files app (Settings > Apps > Special app access > Install unknown apps)." >> $GITHUB_STEP_SUMMARY
+          echo "5. Tap **Install** and launch **OmniCraft 3D**!" >> $GITHUB_STEP_SUMMARY

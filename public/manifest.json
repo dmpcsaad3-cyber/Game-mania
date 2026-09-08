@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "OmniCraft 3D Game Studio",
+  "short_name": "OmniCraft 3D",
+  "description": "No-code 3D platformer and mystery adventure game creator with realistic lighting, weather, companion customization, and branching narratives.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
