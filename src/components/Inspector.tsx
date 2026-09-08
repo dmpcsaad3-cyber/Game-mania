@@ -45,7 +45,13 @@ const PALETTE_ITEMS: { type: GameObjectType; name: string; category: ObjectCateg
   { type: 'chest_loot', name: 'Treasure Chest', category: 'items', color: '#d97706', desc: 'Secret cache' },
   { type: 'portal_exit', name: 'Extraction Portal', category: 'items', color: '#14b8a6', desc: 'Mission completion goal' },
 
-  // Characters & Lights
+  // Characters (Realistic 3D Assets)
+  { type: 'char_tactical_soldier', name: 'Tactical Spec-Ops', category: 'characters', color: '#2563eb', desc: 'Realistic soldier with ballistic armor & assault rifle' },
+  { type: 'char_cyber_ninja', name: 'Cyber Ninja Assassin', category: 'characters', color: '#00f0ff', desc: 'Sleek carbon-fiber ninja with glowing dual katanas' },
+  { type: 'char_mech_sentinel', name: 'Heavy Mech Sentinel', category: 'characters', color: '#ef4444', desc: 'Giant armored combat robot with reactor core' },
+  { type: 'char_sci_fi_operative', name: 'Ghost Operative', category: 'characters', color: '#f97316', desc: 'Special infiltration agent with stealth visor & sidearm' },
+  { type: 'char_mystic_assassin', name: 'Shadow Assassin', category: 'characters', color: '#a855f7', desc: 'Hooded cowl rogue with dual daggers' },
+  { type: 'char_heavy_boss', name: 'Titan Cyber Boss', category: 'characters', color: '#d97706', desc: 'Heavy armored war-boss with power fists' },
   { type: 'enemy_guard', name: 'Syndicate Guard', category: 'characters', color: '#8b5cf6', desc: 'Combat patrol enforcer' },
   { type: 'enemy_drone', name: 'Security Drone', category: 'characters', color: '#f43f5e', desc: 'Hovering surveillance bot' },
   { type: 'street_lamp', name: 'Street Lamp Amber', category: 'lights', color: '#f59e0b', desc: 'Point light source' },

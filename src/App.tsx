@@ -12,6 +12,7 @@ import { StoryBranchEditor } from './components/StoryBranchEditor';
 import { MultiplayerModal } from './components/MultiplayerModal';
 import { TemplateSelector } from './components/TemplateSelector';
 import { MobileAppModal } from './components/MobileAppModal';
+import { PromptStudioModal } from './components/PromptStudioModal';
 
 export default function App() {
   // Main Level State
@@ -25,6 +26,7 @@ export default function App() {
   const [showMultiplayerModal, setShowMultiplayerModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showMobileAppModal, setShowMobileAppModal] = useState(false);
+  const [showPromptStudioModal, setShowPromptStudioModal] = useState(false);
 
   // Gameplay State
   const [playerHp, setPlayerHp] = useState(100);
@@ -113,10 +115,10 @@ export default function App() {
       category = 'mystery';
       scale = [0.8, 0.8, 0.8];
       color = '#fbbf24';
-    } else if (type.startsWith('enemy')) {
+    } else if (type.startsWith('enemy') || type.startsWith('char_')) {
       category = 'characters';
-      scale = [1, 1.8, 1];
-      color = '#8b5cf6';
+      scale = type === 'char_heavy_boss' ? [1.3, 1.3, 1.3] : type === 'char_mech_sentinel' ? [1.15, 1.15, 1.15] : [1, 1, 1];
+      color = type === 'char_cyber_ninja' ? '#00f0ff' : type === 'char_mech_sentinel' ? '#ef4444' : type === 'char_tactical_soldier' ? '#2563eb' : '#8b5cf6';
     } else if (type.includes('lamp') || type.includes('torch')) {
       category = 'lights';
       scale = [0.6, 3, 0.6];
@@ -253,6 +255,7 @@ export default function App() {
         onExport={handleExport}
         onImport={handleImport}
         onOpenMobileAppModal={() => setShowMobileAppModal(true)}
+        onOpenPromptStudio={() => setShowPromptStudioModal(true)}
       />
 
       {/* Main Studio Viewport & Inspector Layout */}
@@ -389,6 +392,21 @@ export default function App() {
 
       {showMobileAppModal && (
         <MobileAppModal onClose={() => setShowMobileAppModal(false)} />
+      )}
+
+      {showPromptStudioModal && (
+        <PromptStudioModal
+          isOpen={showPromptStudioModal}
+          onClose={() => setShowPromptStudioModal(false)}
+          onLevelGenerated={(newLevel, autoPlay) => {
+            setLevel(newLevel);
+            setSelectedObjectId(null);
+            handleResetLevel();
+            if (autoPlay) {
+              setMode('play');
+            }
+          }}
+        />
       )}
     </div>
   );

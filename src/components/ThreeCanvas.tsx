@@ -2,6 +2,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { GameLevel, GameObject, GameObjectType, WeatherType } from '../types/game';
 import { soundEngine } from '../utils/audioSynthesizer';
+import { buildRealisticCharacterMesh } from '../utils/realisticCharacterBuilder';
+import {
+  getStoneBumpTexture,
+  getBrushedMetalTexture,
+  getCyberGridTexture,
+  getTacticalArmorTexture,
+} from '../utils/proceduralTextures';
 
 interface ThreeCanvasProps {
   level: GameLevel;
@@ -116,14 +123,20 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     rendererRef.current = renderer;
 
     // Ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
     scene.add(ambientLight);
     ambientLightRef.current = ambientLight;
 
+    // Realistic Hemisphere Light (Sky illumination + Ground bounce)
+    const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.7);
+    hemiLight.position.set(0, 50, 0);
+    scene.add(hemiLight);
+
     // Directional Sun Light
-    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.4);
+    const sunLight = new THREE.DirectionalLight(0xfffaed, 1.5);
     sunLight.position.set(20, 40, 20);
     sunLight.castShadow = true;
+    sunLight.shadow.bias = -0.0005;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 0.5;
@@ -485,12 +498,16 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       case 'platform_neon': {
         const geom = new THREE.BoxGeometry(obj.scale[0], obj.scale[1], obj.scale[2]);
         const isNeon = obj.type === 'platform_neon';
+        const isMetal = obj.type === 'platform_metal';
+        const isStone = obj.type === 'platform_stone';
+
         const mat = new THREE.MeshStandardMaterial({
           color: baseColor,
-          roughness: obj.type === 'platform_metal' ? 0.2 : 0.7,
-          metalness: obj.type === 'platform_metal' ? 0.8 : 0.1,
+          map: isNeon ? getCyberGridTexture() : isMetal ? getBrushedMetalTexture() : isStone ? getStoneBumpTexture() : undefined,
+          roughness: isMetal ? 0.25 : isNeon ? 0.3 : 0.65,
+          metalness: isMetal ? 0.85 : isNeon ? 0.4 : 0.15,
           emissive: isNeon ? baseColor : new THREE.Color(0x000000),
-          emissiveIntensity: isNeon ? 0.5 : 0
+          emissiveIntensity: isNeon ? 0.55 : 0
         });
         const mesh = new THREE.Mesh(geom, mat);
         mesh.castShadow = true;
@@ -650,6 +667,22 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
         const eye = new THREE.Mesh(eyeGeom, eyeMat);
         eye.position.set(0, isDrone ? 0 : 0.5, 0.35);
         group.add(eye);
+        break;
+      }
+
+      // Realistic Character 3D Assets
+      case 'char_tactical_soldier':
+      case 'char_cyber_ninja':
+      case 'char_mech_sentinel':
+      case 'char_sci_fi_operative':
+      case 'char_mystic_assassin':
+      case 'char_heavy_boss': {
+        const charMesh = buildRealisticCharacterMesh(
+          obj.type,
+          obj.color || (obj.type === 'char_cyber_ninja' ? '#00f0ff' : obj.type === 'char_mech_sentinel' ? '#ef4444' : '#2563eb'),
+          obj.scale[1] || 1.0
+        );
+        group.add(charMesh);
         break;
       }
 
@@ -956,8 +989,8 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
           }
 
           // Combat Hit Check when attacking
-          if (pState.isAttacking && (obj.type === 'enemy_guard' || obj.type === 'enemy_drone')) {
-            if (playerDist < 2.0 && obj.hp && obj.hp > 0) {
+          if (pState.isAttacking && (obj.type === 'enemy_guard' || obj.type === 'enemy_drone' || obj.category === 'characters')) {
+            if (playerDist < 2.2 && obj.hp && obj.hp > 0) {
               obj.hp -= 35 * delta;
               soundEngine.playHit();
               if (mesh) {

@@ -17,6 +17,7 @@ import {
   Volume2,
   VolumeX,
   Smartphone,
+  Wand2,
 } from 'lucide-react';
 import { GameLevel, GameObjectType, WeatherType } from '../types/game';
 
@@ -35,6 +36,7 @@ interface ToolbarProps {
   onExport: () => void;
   onImport: () => void;
   onOpenMobileAppModal: () => void;
+  onOpenPromptStudio: () => void;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -52,6 +54,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   onExport,
   onImport,
   onOpenMobileAppModal,
+  onOpenPromptStudio,
 }) => {
   const WEATHER_OPTIONS: { id: WeatherType; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'rain_storm', label: 'Rain Storm', icon: CloudRain },
@@ -99,6 +102,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               <span>TEST PLAY</span>
             </>
           )}
+        </button>
+
+        {/* AI Prompt Studio Button */}
+        <button
+          onClick={onOpenPromptStudio}
+          className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
+          title="Prompt se game banayein (AI Level Creator)"
+        >
+          <Wand2 className="w-3.5 h-3.5 text-cyan-300" />
+          <span>AI Prompt Studio</span>
         </button>
       </div>
 

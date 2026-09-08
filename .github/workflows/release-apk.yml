@@ -26,7 +26,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -47,18 +47,17 @@ jobs:
         env:
           CAPACITOR_TELEMETRY: "false"
         run: |
-          if [ ! -f "android/build.gradle" ] || [ ! -f "android/app/build.gradle" ]; then
-            echo "Android directory is missing or incomplete. Initializing clean Android platform..."
+          echo "Ensuring Capacitor dependencies are present..."
+          npm install --no-audit --no-fund @capacitor/core@8.5.1 @capacitor/cli@8.5.1 @capacitor/android@8.5.1 --legacy-peer-deps
+
+          if [ ! -d "android" ] || [ ! -f "android/build.gradle" ]; then
+            echo "Android directory missing or incomplete. Adding Android platform..."
             rm -rf android
             npx --yes @capacitor/cli add android
           fi
 
-          if ! npx --yes @capacitor/cli sync android; then
-            echo "Capacitor sync encountered an error. Recreating Android platform from scratch..."
-            rm -rf android
-            npx --yes @capacitor/cli add android
-            npx --yes @capacitor/cli sync android
-          fi
+          echo "Syncing Android project..."
+          npx --yes @capacitor/cli sync android
 
       - name: Make Gradlew Executable
         run: |
